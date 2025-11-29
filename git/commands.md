@@ -31,10 +31,49 @@ git diff HEAD              # All changes (staged + unstaged)
 
 ### View commit log
 ```bash
+git log                    # Full log (press q to exit)
 git log --oneline          # Compact one-line format
 git log --oneline --graph  # With branch graph
 git log -p                 # Show patches (actual changes)
-git log -n 5               # Last 5 commits
+```
+
+### View last N commits
+```bash
+git log -1                 # Last commit only
+git log -5                 # Last 5 commits
+git log -n 10              # Last 10 commits (same as -10)
+git log --oneline -5       # Last 5 in compact format
+```
+
+### View latest commit details
+```bash
+git log -1                           # Last commit (full details)
+git log -1 --stat                    # Last commit with file changes
+git log -1 --name-only               # Last commit with file names
+git log -1 --format="%H"             # Just the commit hash
+git log -1 --format="%h %s"          # Short hash + message
+git log -1 --format="%an - %s"       # Author name + message
+```
+
+### View specific commit (git show)
+```bash
+git show                             # Last commit with diff
+git show --stat                      # Last commit with stats
+git show abc1234                     # Specific commit by hash
+git show abc1234 --stat              # Specific commit with file stats
+git show abc1234 --name-only         # Just file names changed
+git show abc1234 --no-stat -p        # Only the diff (no file stats)
+git show abc1234:path/to/file.txt    # File content at that commit
+git show HEAD~2                      # 2 commits before HEAD
+git show main:README.md              # File content on main branch
+```
+`--no-stat` hides the file change summary, `-p` shows the patch (diff).
+
+### Custom log formats
+```bash
+git log --format="%h %an %ar %s"     # hash, author, time ago, message
+git log --format="%h %ad %s" --date=short  # hash, date, message
+git log --pretty=format:"%C(yellow)%h%C(reset) %s %C(blue)<%an>%C(reset)"  # Colored
 ```
 
 ---
