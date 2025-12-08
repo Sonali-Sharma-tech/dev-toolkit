@@ -80,6 +80,36 @@ find . -type f -mtime -1
 find . -type f -mmin -30            # Last 30 minutes
 ```
 
+### Archive old log files
+```bash
+find /var/log -name "*.log" -mtime +7 -exec gzip {} \;
+```
+
+### Create directory tree from file list
+```bash
+cat directories.txt | xargs mkdir -p
+```
+
+### Batch convert images (requires imagemagick)
+```bash
+for img in *.png; do convert "$img" "${img%.png}.jpg"; done
+```
+
+### Find broken symlinks and remove them
+```bash
+find . -type l -xtype l -delete
+```
+
+### Copy directory structure (no files)
+```bash
+find source/ -type d -exec mkdir -p dest/{} \;
+```
+
+### Find files containing text (exclude binaries)
+```bash
+find . -type f -exec grep -Il "search_term" {} \;
+```
+
 ---
 
 ## Text Processing
@@ -185,6 +215,59 @@ sed -n '10,20p' file.txt        # Print lines 10-20
 ### Print every Nth line
 ```bash
 awk 'NR % 5 == 0' file.txt      # Every 5th line
+```
+
+### Replace multiple spaces with single space
+```bash
+tr -s ' ' < file.txt
+sed 's/  */ /g' file.txt         # Alternative
+```
+
+### Convert file to lowercase/uppercase
+```bash
+tr '[:upper:]' '[:lower:]' < file.txt > lowercase.txt
+tr '[:lower:]' '[:upper:]' < file.txt > uppercase.txt
+```
+
+### Remove all digits from file
+```bash
+tr -d '0-9' < file.txt
+```
+
+### Extract columns from CSV
+```bash
+cut -d',' -f1,3 data.csv         # Extract columns 1 and 3
+awk -F',' '{print $1","$3}' data.csv  # Alternative
+```
+
+### Add line numbers to file
+```bash
+nl file.txt                      # With formatting
+cat -n file.txt                  # Simple numbering
+awk '{print NR ": " $0}' file.txt  # Custom format
+```
+
+### Merge lines in pairs
+```bash
+paste -d' ' - - < file.txt      # Join every 2 lines
+```
+
+### Remove empty lines
+```bash
+grep -v '^$' file.txt
+sed '/^$/d' file.txt             # Alternative
+awk 'NF' file.txt                # Another way
+```
+
+### Sort by column
+```bash
+sort -k2 -n data.txt             # Sort by 2nd column numerically
+sort -t',' -k3 -r data.csv       # Sort CSV by 3rd column reverse
+```
+
+### Get unique lines with counts
+```bash
+sort file.txt | uniq -c | sort -nr | head -10  # Top 10 most frequent
 ```
 
 ---
@@ -320,6 +403,74 @@ timeout 10 ./long_running_script.sh     # Linux
 gtimeout 10 ./script.sh                 # macOS (brew install coreutils)
 ```
 
+### Show system info
+```bash
+uname -a                         # All system info
+uptime                           # How long system running
+who                              # Who's logged in
+w                                # Who's doing what
+```
+
+### Memory usage
+```bash
+free -h                          # Linux human-readable
+vm_stat                          # macOS
+top -l 1 | grep PhysMem          # macOS physical memory
+```
+
+### CPU info
+```bash
+lscpu                            # Linux detailed
+sysctl -n hw.ncpu                # macOS number of CPUs
+nproc                            # Linux CPU count
+```
+
+### Kill all processes by name
+```bash
+pkill firefox
+killall firefox                  # Alternative
+kill $(pgrep firefox)            # Another way
+```
+
+### Background job management
+```bash
+command &                        # Run in background
+jobs                             # List background jobs
+fg %1                            # Bring job 1 to foreground
+bg %2                            # Continue job 2 in background
+disown %1                        # Detach job from terminal
+```
+
+### Run command as another user
+```bash
+sudo -u www-data command         # Run as www-data user
+su - username -c "command"       # Alternative
+```
+
+### Check service status
+```bash
+systemctl status nginx           # Linux systemd
+service nginx status             # Older Linux
+brew services list               # macOS Homebrew services
+```
+
+### Resource usage per process
+```bash
+ps aux | awk '{print $2, $3, $4, $11}' | sort -k2 -nr | head  # PID, CPU%, MEM%, CMD
+```
+
+### Find zombie processes
+```bash
+ps aux | grep -w defunct
+ps aux | awk '$8 ~ /^Z/'         # Alternative
+```
+
+### Show open files limit
+```bash
+ulimit -n                        # Current limit
+ulimit -a                        # All limits
+```
+
 ---
 
 ## Networking
@@ -405,6 +556,68 @@ scp -r folder/ user@host:/path/to/destination    # Recursive
 ### Rsync with progress
 ```bash
 rsync -avz --progress source/ user@host:/destination/
+```
+
+### Quick web server for current directory
+```bash
+python3 -m http.server 8000      # Python 3
+python -m SimpleHTTPServer 8000  # Python 2
+php -S localhost:8000            # PHP
+ruby -run -ehttpd . -p8000       # Ruby
+```
+
+### Share files via netcat
+```bash
+# Sender
+nc -l 9999 < file.txt
+
+# Receiver
+nc sender_ip 9999 > received.txt
+```
+
+### Monitor network connections in real-time
+```bash
+watch -n 1 'netstat -an | grep ESTABLISHED'
+watch -n 1 'ss -t state established'   # Linux modern
+```
+
+### Check internet connectivity
+```bash
+ping -c 1 8.8.8.8 &>/dev/null && echo "Internet: Connected" || echo "Internet: Disconnected"
+```
+
+### Get weather from terminal
+```bash
+curl wttr.in
+curl wttr.in/London              # Specific location
+curl wttr.in/?format=3           # One-line format
+```
+
+### Speed test from terminal
+```bash
+curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 -
+```
+
+### Download website for offline viewing
+```bash
+wget --mirror --convert-links --adjust-extension --page-requisites --no-parent https://example.com
+```
+
+### Monitor bandwidth usage
+```bash
+iftop                            # Interactive (install: brew install iftop)
+nethogs                          # Per-process bandwidth
+vnstat -l                        # Simple bandwidth monitor
+```
+
+### Create SSH key and copy to server in one line
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/mykey -N "" && ssh-copy-id -i ~/.ssh/mykey user@host
+```
+
+### Port scan using bash
+```bash
+for port in {1..65535}; do (echo >/dev/tcp/localhost/$port) &>/dev/null && echo "Port $port open"; done
 ```
 
 ---
@@ -773,6 +986,90 @@ printf '\033[2J\033[3J\033[1;1H'    # Works in most terminals
 sudo !!
 ```
 
+### Navigate directory history
+```bash
+pushd /path/to/dir               # Save current dir and go to new one
+popd                             # Return to saved directory
+dirs                             # Show directory stack
+```
+
+### Quick backup before editing
+```bash
+cp file.conf{,.bak}              # Creates file.conf.bak
+vim !$ && diff file.conf{.bak,}  # Edit and see changes
+```
+
+### Run command in all subdirectories
+```bash
+for d in */; do (cd "$d" && pwd && git status); done
+find . -type d -name .git -exec dirname {} \; | xargs -I {} sh -c 'cd "{}" && pwd && git pull'
+```
+
+### Monitor log file and highlight pattern
+```bash
+tail -f /var/log/syslog | grep --color=always -E "error|warning|$"
+```
+
+### Quick notes from terminal
+```bash
+echo "$(date): Remember to fix login bug" >> ~/notes.txt
+alias note='echo "$(date): $*" >> ~/notes.txt'   # Usage: note Fix login bug
+```
+
+### Extract archives (any format)
+```bash
+extract() {
+  case $1 in
+    *.tar.gz|*.tgz) tar xzf "$1" ;;
+    *.tar.bz2|*.tbz) tar xjf "$1" ;;
+    *.zip) unzip "$1" ;;
+    *.rar) unrar x "$1" ;;
+    *.7z) 7z x "$1" ;;
+    *) echo "Unknown archive format" ;;
+  esac
+}
+```
+
+### Show PATH formatted
+```bash
+echo $PATH | tr ':' '\n' | nl
+```
+
+### Repeat command until it succeeds
+```bash
+while ! command; do sleep 1; done
+until ping -c1 google.com &>/dev/null; do sleep 1; done
+```
+
+### Run command and speak result (macOS)
+```bash
+ls -la | say
+echo "Task completed" | say -v Samantha
+```
+
+### Quick timer
+```bash
+sleep 10m && echo "Time's up!" | say    # 10 minute timer (macOS)
+sleep 25m && notify-send "Pomodoro break!"  # Linux with notifications
+```
+
+### Watch for file changes
+```bash
+while true; do clear; ls -la; sleep 2; done
+fswatch -o file.txt | xargs -n1 -I{} echo "File changed!"  # macOS (brew install fswatch)
+```
+
+### Quick performance test
+```bash
+time command                     # Time a command
+for i in {1..10}; do time command; done | grep real  # Run 10 times
+```
+
+### One-line progress bar
+```bash
+for i in {1..100}; do printf "\r%3d%% complete" $i; sleep 0.1; done; echo
+```
+
 ---
 
 ## Quick Reference: Useful Aliases
@@ -817,6 +1114,27 @@ alias dps="docker ps"
 alias dpa="docker ps -a"
 alias di="docker images"
 alias dex="docker exec -it"
+alias dstop='docker stop $(docker ps -q)'
+alias drm='docker rm $(docker ps -aq)'
+
+# Development shortcuts
+alias py="python3"
+alias serve="python3 -m http.server 8000"
+alias npmfresh="rm -rf node_modules package-lock.json && npm install"
+alias ports="lsof -i -P -n | grep LISTEN"
+alias flushdns="sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder"
+
+# Directory shortcuts
+alias work="cd ~/workspace"
+alias dl="cd ~/Downloads"
+alias docs="cd ~/Documents"
+
+# System shortcuts
+alias update="brew update && brew upgrade && brew cleanup"  # macOS
+alias update="sudo apt update && sudo apt upgrade"          # Ubuntu
+alias please="sudo"
+alias reload="exec $SHELL"
+alias h="history | grep"
 ```
 
 ---
