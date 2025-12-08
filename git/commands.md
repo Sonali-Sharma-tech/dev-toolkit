@@ -485,6 +485,132 @@ git show <commit-hash>:path/to/file
 ```
 Display contents of a file as it existed in a specific commit.
 
+### 37. Pull with Rebase (Linear History)
+```bash
+git pull --rebase origin main
+# Equivalent to:
+# git fetch origin main
+# git rebase origin/main
+```
+Instead of creating a merge commit, replays your local commits on top of remote changes. Keeps history linear and clean.
+
+**When to use:**
+- Before pushing your changes
+- On feature branches
+- When you want clean history
+
+**Don't use when:**
+- Commits are already pushed and shared
+- Working on main/master branch with others
+
+Configure as default:
+```bash
+git config pull.rebase true              # For current repo
+git config --global pull.rebase true     # For all repos
+```
+
+---
+
+## GitHub CLI (gh) Commands
+
+### Switch GitHub Accounts
+```bash
+# View current authentication status
+gh auth status
+
+# Login to a different account
+gh auth login
+# Choose: GitHub.com → HTTPS → Login with web browser
+
+# Switch between accounts
+gh auth switch
+
+# List all authenticated accounts
+gh auth list
+
+# Set active account
+gh auth switch -u username
+
+# Logout from an account
+gh auth logout -u username
+```
+
+### Multiple Account Setup
+```bash
+# Login to multiple accounts
+gh auth login -h github.com
+gh auth login -h github.com --with-token < token.txt
+
+# Use different account for a specific command
+GH_TOKEN=your_personal_token gh repo list
+```
+
+---
+
+## Clone with Specific User Config
+
+### Clone and set user immediately
+```bash
+# Clone and configure in one go
+git clone https://github.com/user/repo.git && \
+cd repo && \
+git config user.name "Your Name" && \
+git config user.email "your.email@example.com"
+```
+
+### Clone with custom config
+```bash
+# Method 1: Clone then configure
+git clone https://github.com/user/repo.git
+cd repo
+git config user.name "John Doe"
+git config user.email "john@example.com"
+
+# Method 2: Clone with config in one line
+git -c user.name="John Doe" -c user.email="john@example.com" clone https://github.com/user/repo.git
+
+# Method 3: Using environment variables
+GIT_AUTHOR_NAME="John Doe" \
+GIT_AUTHOR_EMAIL="john@example.com" \
+GIT_COMMITTER_NAME="John Doe" \
+GIT_COMMITTER_EMAIL="john@example.com" \
+git clone https://github.com/user/repo.git
+```
+
+### Setup different users for work/personal
+```bash
+# Personal projects
+git config --global user.name "Personal Name"
+git config --global user.email "personal@example.com"
+
+# Work projects (override in specific repos)
+cd work-project
+git config user.name "Work Name"
+git config user.email "work@company.com"
+
+# Check current config
+git config user.name
+git config user.email
+```
+
+### Use SSH with different accounts
+```bash
+# ~/.ssh/config
+Host github-personal
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_personal
+
+Host github-work
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_work
+
+# Clone using specific SSH config
+git clone git@github-personal:username/repo.git
+git clone git@github-work:company/repo.git
+```
+
 ---
 
 ## Quick Tips
