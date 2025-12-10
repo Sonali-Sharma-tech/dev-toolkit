@@ -11,6 +11,8 @@ A comprehensive guide to useful git commands, from daily operations to advanced 
 - [Staging and Unstaging](#staging-and-unstaging)
 - [Tags](#tags)
 - [Advanced Git Commands](#advanced-git-commands)
+- [GitHub CLI (gh) Commands](#github-cli-gh-commands)
+- [Clone with Specific User Config](#clone-with-specific-user-config)
 
 ---
 
@@ -522,36 +524,288 @@ git config --global pull.rebase true     # For all repos
 
 ## GitHub CLI (gh) Commands
 
-### Switch GitHub Accounts
+### Authentication
 ```bash
-# View current authentication status
-gh auth status
-
-# Login to a different account
-gh auth login
-# Choose: GitHub.com → HTTPS → Login with web browser
-
-# Switch between accounts
-gh auth switch
-
-# List all authenticated accounts
-gh auth list
-
-# Set active account
-gh auth switch -u username
-
-# Logout from an account
-gh auth logout -u username
+gh auth status                      # View current auth status
+gh auth login                       # Login (interactive)
+gh auth login --with-token < token.txt  # Login with token
+gh auth switch                      # Switch between accounts
+gh auth switch -u username          # Switch to specific account
+gh auth list                        # List all authenticated accounts
+gh auth logout                      # Logout current account
+gh auth logout -u username          # Logout specific account
+gh auth refresh                     # Refresh stored credentials
 ```
 
-### Multiple Account Setup
+### Pull Requests
 ```bash
-# Login to multiple accounts
-gh auth login -h github.com
-gh auth login -h github.com --with-token < token.txt
+# Create PRs
+gh pr create                        # Interactive PR creation
+gh pr create --title "Title" --body "Description"
+gh pr create --draft                # Create as draft PR
+gh pr create --base main            # Specify base branch
+gh pr create --web                  # Open browser to create PR
 
-# Use different account for a specific command
-GH_TOKEN=your_personal_token gh repo list
+# List and view PRs
+gh pr list                          # List open PRs
+gh pr list --state all              # List all PRs (open, closed, merged)
+gh pr list --author @me             # Your PRs only
+gh pr list --assignee username      # PRs assigned to user
+gh pr list --label "bug"            # PRs with specific label
+gh pr view 123                      # View PR #123 details
+gh pr view 123 --web                # Open PR in browser
+gh pr view --comments               # View PR with comments
+
+# Work with PRs
+gh pr checkout 123                  # Checkout PR branch locally
+gh pr diff 123                      # View PR diff
+gh pr merge 123                     # Merge PR (interactive)
+gh pr merge 123 --squash            # Squash and merge
+gh pr merge 123 --rebase            # Rebase and merge
+gh pr merge 123 --merge             # Create merge commit
+gh pr merge 123 --auto              # Auto-merge when checks pass
+gh pr close 123                     # Close PR without merging
+gh pr reopen 123                    # Reopen closed PR
+gh pr ready 123                     # Mark draft as ready for review
+
+# Review PRs
+gh pr review 123 --approve          # Approve PR
+gh pr review 123 --comment -b "LGTM"  # Comment on PR
+gh pr review 123 --request-changes -b "Fix typo"
+
+# PR checks
+gh pr checks 123                    # View CI/CD status
+gh pr checks 123 --watch            # Watch checks in real-time
+```
+
+### Issues
+```bash
+# Create issues
+gh issue create                     # Interactive issue creation
+gh issue create --title "Bug" --body "Description"
+gh issue create --label "bug,urgent"
+gh issue create --assignee @me
+gh issue create --web               # Open browser to create
+
+# List and view issues
+gh issue list                       # List open issues
+gh issue list --state all           # All issues
+gh issue list --assignee @me        # Assigned to you
+gh issue list --author @me          # Created by you
+gh issue list --label "bug"         # Filter by label
+gh issue list --search "keyword"    # Search issues
+gh issue view 45                    # View issue #45
+gh issue view 45 --web              # Open in browser
+gh issue view 45 --comments         # View with comments
+
+# Manage issues
+gh issue close 45                   # Close issue
+gh issue reopen 45                  # Reopen issue
+gh issue edit 45 --title "New title"
+gh issue edit 45 --add-label "priority"
+gh issue edit 45 --add-assignee username
+gh issue comment 45 --body "Comment text"
+gh issue pin 45                     # Pin issue
+gh issue unpin 45                   # Unpin issue
+gh issue transfer 45 owner/new-repo # Transfer to another repo
+```
+
+### Repository
+```bash
+# Clone and create
+gh repo clone owner/repo            # Clone repository
+gh repo clone owner/repo -- --depth 1  # Shallow clone
+gh repo create my-repo              # Create new repo (interactive)
+gh repo create my-repo --public     # Create public repo
+gh repo create my-repo --private    # Create private repo
+gh repo create --source . --push    # Create from current directory
+gh repo fork owner/repo             # Fork a repository
+gh repo fork owner/repo --clone     # Fork and clone
+
+# View and browse
+gh repo view                        # View current repo info
+gh repo view owner/repo             # View specific repo
+gh repo view --web                  # Open repo in browser
+gh repo list                        # List your repos
+gh repo list owner                  # List user's repos
+gh repo list --source               # Only non-forks
+gh repo list --limit 50             # Limit results
+
+# Manage repo
+gh repo edit --default-branch main  # Change default branch
+gh repo edit --visibility public    # Change visibility
+gh repo rename new-name             # Rename repository
+gh repo delete owner/repo --yes     # Delete repo (careful!)
+gh repo sync                        # Sync fork with upstream
+gh repo archive owner/repo          # Archive repository
+```
+
+### Workflow Runs (GitHub Actions)
+```bash
+# List and view runs
+gh run list                         # List recent workflow runs
+gh run list --workflow build.yml    # Filter by workflow
+gh run list --branch main           # Filter by branch
+gh run list --status failure        # Filter by status
+gh run view                         # View latest run
+gh run view 12345                   # View specific run
+gh run view 12345 --web             # Open run in browser
+gh run view 12345 --log             # View full logs
+gh run view 12345 --log-failed      # View only failed logs
+
+# Manage runs
+gh run watch                        # Watch latest run
+gh run watch 12345                  # Watch specific run
+gh run rerun 12345                  # Rerun a workflow
+gh run rerun 12345 --failed         # Rerun only failed jobs
+gh run cancel 12345                 # Cancel a run
+gh run download 12345               # Download artifacts
+
+# Trigger workflows
+gh workflow run build.yml           # Trigger workflow
+gh workflow run build.yml --ref feature-branch
+gh workflow run build.yml -f param=value  # With inputs
+gh workflow list                    # List workflows
+gh workflow view build.yml          # View workflow details
+gh workflow enable build.yml        # Enable workflow
+gh workflow disable build.yml       # Disable workflow
+```
+
+### Releases
+```bash
+# Create releases
+gh release create v1.0.0            # Create release (interactive)
+gh release create v1.0.0 --title "Release 1.0"
+gh release create v1.0.0 --notes "Release notes here"
+gh release create v1.0.0 --generate-notes  # Auto-generate notes
+gh release create v1.0.0 --draft    # Create as draft
+gh release create v1.0.0 --prerelease
+gh release create v1.0.0 ./dist/*   # Upload assets
+
+# List and view
+gh release list                     # List releases
+gh release view v1.0.0              # View release details
+gh release view v1.0.0 --web        # Open in browser
+
+# Manage releases
+gh release download v1.0.0          # Download release assets
+gh release download v1.0.0 --pattern "*.zip"
+gh release edit v1.0.0 --draft=false  # Publish draft
+gh release delete v1.0.0            # Delete release
+gh release upload v1.0.0 ./file.zip # Upload additional asset
+```
+
+### Gists
+```bash
+gh gist create file.txt             # Create gist from file
+gh gist create file1.txt file2.txt  # Multiple files
+gh gist create --public file.txt    # Public gist
+gh gist create -d "Description" file.txt
+cat file.txt | gh gist create       # From stdin
+gh gist list                        # List your gists
+gh gist view <gist-id>              # View gist
+gh gist view <gist-id> --raw        # View raw content
+gh gist edit <gist-id>              # Edit gist
+gh gist clone <gist-id>             # Clone gist
+gh gist delete <gist-id>            # Delete gist
+```
+
+### Browse (Quick Open in Browser)
+```bash
+gh browse                           # Open repo in browser
+gh browse --settings                # Open repo settings
+gh browse --wiki                    # Open wiki
+gh browse --projects                # Open projects
+gh browse path/to/file.js           # Open specific file
+gh browse path/to/file.js:42        # Open file at line 42
+gh browse --branch feature          # Open specific branch
+gh browse --commit abc123           # Open specific commit
+```
+
+### Search
+```bash
+# Search repos
+gh search repos "language:go stars:>1000"
+gh search repos "org:facebook react"
+gh search repos --owner=username
+
+# Search issues and PRs
+gh search issues "bug label:urgent"
+gh search issues "is:open is:issue author:@me"
+gh search prs "is:open review-requested:@me"
+gh search prs "is:merged author:@me"
+
+# Search code
+gh search code "className" --repo owner/repo
+gh search code "TODO" --filename "*.js"
+
+# Search commits
+gh search commits "fix bug" --author username
+```
+
+### API (Direct GitHub API Access)
+```bash
+# GET requests
+gh api repos/owner/repo             # Get repo info
+gh api user                         # Get current user
+gh api repos/owner/repo/pulls       # List PRs via API
+gh api repos/owner/repo/issues/123/comments  # Get issue comments
+
+# POST/PATCH requests
+gh api repos/owner/repo/issues -f title="Title" -f body="Body"
+gh api repos/owner/repo/issues/123 -X PATCH -f state="closed"
+
+# GraphQL
+gh api graphql -f query='{ viewer { login } }'
+
+# Pagination
+gh api repos/owner/repo/issues --paginate
+```
+
+### Configuration
+```bash
+gh config list                      # List all config
+gh config get editor                # Get specific setting
+gh config set editor vim            # Set editor
+gh config set git_protocol ssh      # Use SSH for git operations
+gh config set browser firefox       # Set default browser
+gh config set prompt disabled       # Disable interactive prompts
+```
+
+### Aliases (Custom Commands)
+```bash
+gh alias set pv "pr view"           # Create alias
+gh alias set co "pr checkout"
+gh alias set mypr "pr list --author @me"
+gh alias list                       # List all aliases
+gh alias delete pv                  # Delete alias
+```
+
+### Extensions
+```bash
+gh extension list                   # List installed extensions
+gh extension search                 # Search available extensions
+gh extension install owner/gh-ext  # Install extension
+gh extension upgrade owner/gh-ext  # Upgrade extension
+gh extension remove owner/gh-ext   # Remove extension
+```
+
+### Useful Combinations
+```bash
+# Quick PR workflow
+gh pr create --fill && gh pr merge --auto --squash
+
+# Check CI and open PR if passing
+gh pr checks --watch && gh browse
+
+# Create issue from template
+gh issue create --template bug_report.md
+
+# Clone all repos from an org
+gh repo list org-name --limit 100 --json name -q '.[].name' | xargs -I {} gh repo clone org-name/{}
+
+# Watch latest workflow and notify
+gh run watch && echo "Build complete!"
 ```
 
 ---
