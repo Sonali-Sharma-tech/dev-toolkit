@@ -29,6 +29,15 @@ git diff --staged           # Staged changes
 git diff HEAD              # All changes (staged + unstaged)
 ```
 
+### Save diff to a file (quick patch)
+```bash
+git diff > ~/my-changes.diff                    # Save unstaged changes
+git diff --staged > ~/staged-changes.diff       # Save staged changes
+git diff HEAD > ~/all-changes.diff              # Save all changes
+git diff main..feature > ~/branch-diff.diff    # Save diff between branches
+```
+Unlike `git stash`, this just saves the changes to a file without modifying your working directory. Useful for backup, sharing, or reviewing later. Apply with `git apply ~/my-changes.diff`.
+
 ### View commit log
 ```bash
 git log                    # Full log (press q to exit)
@@ -622,4 +631,4 @@ git clone git@github-work:company/repo.git
 
 ---
 
-*Last updated: 2025-11-23*
+*Last updated: 2025-12-10*
