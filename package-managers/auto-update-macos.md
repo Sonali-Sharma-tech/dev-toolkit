@@ -9,9 +9,6 @@ A step-by-step guide to configure automatic updates for VS Code, Claude CLI, and
 - [Claude CLI Auto-Update](#claude-cli-auto-update)
 - [Homebrew Auto-Update](#homebrew-auto-update)
 - [Troubleshooting](#troubleshooting)
-- [Quick One-Liners to Update Anything](#quick-one-liners-to-update-anything)
-- [Auto-Updating Other Applications](#auto-updating-other-applications)
-- [Why Homebrew Over Other Package Managers?](#why-homebrew-over-other-package-managers)
 
 ---
 
@@ -243,65 +240,6 @@ brew autoupdate delete  # Remove completely
 - **Homebrew**: Daily automatic updates at system level
 
 All tools stay current without manual intervention!
-
----
-
-## Quick One-Liners to Update Anything
-
-### Universal Update Commands
-```bash
-# Update ANY Homebrew app (GUI or CLI)
-brew upgrade <app-name>
-
-# Update ALL Homebrew apps at once
-brew update && brew upgrade && brew cleanup
-
-# Update specific cask (GUI app)
-brew upgrade --cask <app-name>
-
-# Update specific formula (CLI tool)
-brew upgrade <tool-name>
-```
-
-### Examples
-```bash
-brew upgrade claude-code           # Update Claude CLI
-brew upgrade --cask docker         # Update Docker Desktop
-brew upgrade --cask slack          # Update Slack
-brew upgrade --cask visual-studio-code  # Update VS Code
-brew upgrade node                  # Update Node.js
-brew upgrade git                   # Update Git
-brew upgrade python                # Update Python
-```
-
-### Generic Pattern: Install → Auto-Update Forever
-```bash
-# Step 1: Install any app via Homebrew (one-time)
-brew install --cask <app-name>     # For GUI apps
-brew install <tool-name>           # For CLI tools
-
-# Step 2: That's it! With our autoupdate setup, it updates daily.
-# Or manually update anytime:
-brew upgrade <app-name>
-```
-
-### Check if an App is Available in Homebrew
-```bash
-brew search <app-name>             # Search all packages
-brew info <app-name>               # Get details before installing
-```
-
-### Update Everything in One Command
-```bash
-# The ultimate one-liner
-brew update && brew upgrade && brew cleanup && mas upgrade
-
-# What it does:
-# brew update    → Fetch latest package info
-# brew upgrade   → Update all Homebrew packages
-# brew cleanup   → Remove old versions
-# mas upgrade    → Update Mac App Store apps
-```
 
 ---
 

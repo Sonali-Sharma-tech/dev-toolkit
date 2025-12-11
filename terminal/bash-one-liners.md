@@ -14,6 +14,7 @@ Practical one-liners you'll actually use. No fluff, just copy-paste ready comman
 - [Loops & Batch Operations](#loops--batch-operations)
 - [JSON Processing](#json-processing)
 - [Productivity Shortcuts](#productivity-shortcuts)
+- [Package Management & Updates](#package-management--updates)
 
 ---
 
@@ -1068,6 +1069,90 @@ for i in {1..10}; do time command; done | grep real  # Run 10 times
 ### One-line progress bar
 ```bash
 for i in {1..100}; do printf "\r%3d%% complete" $i; sleep 0.1; done; echo
+```
+
+---
+
+## Package Management & Updates
+
+### Update Any App (Homebrew)
+```bash
+brew upgrade <app-name>              # Update any single app
+brew upgrade --cask <app-name>       # Update GUI app specifically
+brew update && brew upgrade          # Update all packages
+brew update && brew upgrade && brew cleanup  # Update all + clean old versions
+```
+
+### Common App Updates
+```bash
+brew upgrade claude-code             # Claude CLI
+brew upgrade --cask docker           # Docker Desktop
+brew upgrade --cask slack            # Slack
+brew upgrade --cask visual-studio-code  # VS Code
+brew upgrade node                    # Node.js
+brew upgrade git                     # Git
+brew upgrade python                  # Python
+```
+
+### Ultimate Update One-Liner
+```bash
+brew update && brew upgrade && brew cleanup && mas upgrade
+```
+Updates Homebrew packages + Mac App Store apps in one command.
+
+### Check If App Is Available
+```bash
+brew search <app-name>               # Search packages
+brew info <app-name>                 # Get details
+```
+
+### Install → Auto-Update Forever
+```bash
+brew install --cask <app-name>       # Install GUI app (one-time)
+brew install <tool-name>             # Install CLI tool (one-time)
+# With brew autoupdate configured, updates happen automatically
+```
+
+### List Outdated Packages
+```bash
+brew outdated                        # List all outdated
+brew outdated --cask                 # Only GUI apps
+brew outdated --formula              # Only CLI tools
+```
+
+### Rollback to Previous Version
+```bash
+brew list --versions <package>       # See available versions
+brew switch <package> <version>      # Switch to specific version
+```
+
+### NPM Global Packages
+```bash
+npm outdated -g                      # Check outdated global packages
+npm update -g                        # Update all global packages
+npm update -g <package-name>         # Update specific package
+```
+
+### Python Packages
+```bash
+pip list --outdated                  # Check outdated
+pip install --upgrade <package>      # Update specific
+pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U  # Update all
+```
+
+### macOS System Updates
+```bash
+softwareupdate -l                    # List available updates
+softwareupdate -ia                   # Install all updates
+softwareupdate -ir                   # Install and restart if needed
+```
+
+### Mac App Store (requires mas)
+```bash
+brew install mas                     # Install mas CLI
+mas outdated                         # Check outdated apps
+mas upgrade                          # Update all App Store apps
+mas upgrade <app-id>                 # Update specific app
 ```
 
 ---
