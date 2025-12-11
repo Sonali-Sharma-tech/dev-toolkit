@@ -143,6 +143,32 @@ git ls-remote --heads origin
 ```
 Shows all branches available on the remote repository without fetching them.
 
+### Force Push (Safe vs Dangerous)
+```bash
+# DANGEROUS - overwrites remote history blindly
+git push --force                    # Avoid this!
+git push -f                         # Same thing, still dangerous
+
+# SAFE - only pushes if remote hasn't changed
+git push --force-with-lease         # Recommended!
+git push --force-with-lease origin feature-branch
+```
+`--force-with-lease` is a safer alternative to `--force`. It checks that the remote branch hasn't been updated by someone else since your last fetch. If it has, the push is rejected — preventing you from accidentally overwriting a teammate's commits.
+
+**When to use force push:**
+- After rebasing a feature branch
+- After amending commits
+- After squashing commits
+- Cleaning up PR history before merge
+
+**Always use `--force-with-lease` instead of `--force`** unless you're absolutely certain you want to overwrite remote changes.
+
+```bash
+# Set as alias for safety
+git config --global alias.pushf "push --force-with-lease"
+# Now use: git pushf
+```
+
 ---
 
 ## Merge Operations
