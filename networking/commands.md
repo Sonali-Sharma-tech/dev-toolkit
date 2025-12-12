@@ -5,6 +5,7 @@ Essential networking commands for developers. From checking connectivity to debu
 ## Table of Contents
 - [Installation](#installation)
 - [Connectivity & DNS](#connectivity--dns)
+- [Network Discovery](#discover-devices-on-local-network-lanwi-fi)
 - [HTTP Requests (curl)](#http-requests-curl)
 - [API Testing](#api-testing)
 - [SSH & Remote Access](#ssh--remote-access)
@@ -112,6 +113,47 @@ dig @208.67.222.222 example.com # OpenDNS
 traceroute google.com           # Linux/macOS
 tracepath google.com            # Linux alternative
 mtr google.com                  # Real-time traceroute (install: brew install mtr)
+```
+
+### Discover devices on local network (LAN/Wi-Fi)
+```bash
+# Find all devices on your network using arp
+arp -a                                  # Show all cached IP/MAC addresses
+
+# Scan entire subnet with nmap (most reliable)
+nmap -sn 192.168.1.0/24                 # Ping scan - find live hosts
+nmap -sn 192.168.0.0/24                 # Common alternate subnet
+
+# Quick scan with IP range
+nmap -sn 192.168.1.1-254                # Scan specific range
+
+# Get count of connected devices
+nmap -sn 192.168.1.0/24 | grep "Nmap scan" | wc -l
+
+# Detailed scan with hostnames and MAC addresses
+sudo nmap -sn 192.168.1.0/24            # sudo shows MAC addresses
+
+# Using arp-scan (faster, requires install)
+# Install: brew install arp-scan (macOS) or sudo apt install arp-scan (Linux)
+sudo arp-scan --localnet                # Scan all local interfaces
+sudo arp-scan -I en0 --localnet         # Scan specific interface (macOS Wi-Fi)
+sudo arp-scan -I eth0 --localnet        # Scan specific interface (Linux)
+
+# Find your subnet first (to know what to scan)
+# macOS
+ipconfig getifaddr en0 && netstat -rn | grep default
+# Linux
+ip route | grep default
+hostname -I | awk '{print $1}'
+```
+
+**Quick one-liner to count devices on network:**
+```bash
+# macOS/Linux - count IPs on same network
+nmap -sn $(ip route | grep -oP 'src \K[\d.]+' | head -1)/24 2>/dev/null | grep -c "Nmap scan"
+
+# macOS specific
+nmap -sn $(ipconfig getifaddr en0 | sed 's/\.[0-9]*$/.0/')/24 | grep -c "Nmap scan"
 ```
 
 ### Get your IP address
