@@ -117,42 +117,46 @@ mtr google.com                  # Real-time traceroute (install: brew install mt
 
 ### Discover devices on local network (LAN/Wi-Fi)
 ```bash
-# Find all devices on your network using arp
-arp -a                                  # Show all cached IP/MAC addresses
+# Show ARP cache - IPs/MACs your machine has recently talked to (quick but incomplete)
+arp -a
 
-# Scan entire subnet with nmap (most reliable)
-nmap -sn 192.168.1.0/24                 # Ping scan - find live hosts
-nmap -sn 192.168.0.0/24                 # Common alternate subnet
+# Ping scan entire subnet - /24 = all 256 IPs (192.168.1.0 to 192.168.1.255)
+# -sn = no port scan, just check if hosts are alive
+nmap -sn 192.168.1.0/24
+nmap -sn 192.168.0.0/24                 # Try this if above doesn't match your network
 
-# Quick scan with IP range
-nmap -sn 192.168.1.1-254                # Scan specific range
+# Explicit range syntax - scan .1 through .254
+nmap -sn 192.168.1.1-254
 
-# Get count of connected devices
+# Count live hosts - grep matches "Nmap scan report for..." per device
 nmap -sn 192.168.1.0/24 | grep "Nmap scan" | wc -l
 
-# Detailed scan with hostnames and MAC addresses
-sudo nmap -sn 192.168.1.0/24            # sudo shows MAC addresses
+# With sudo: uses raw sockets to show MAC addresses + vendor (Apple, Samsung, etc.)
+sudo nmap -sn 192.168.1.0/24
 
-# Using arp-scan (faster, requires install)
+# arp-scan: faster than nmap (uses ARP protocol directly, requires root)
 # Install: brew install arp-scan (macOS) or sudo apt install arp-scan (Linux)
-sudo arp-scan --localnet                # Scan all local interfaces
-sudo arp-scan -I en0 --localnet         # Scan specific interface (macOS Wi-Fi)
-sudo arp-scan -I eth0 --localnet        # Scan specific interface (Linux)
+sudo arp-scan --localnet               # Scan all local interfaces
+sudo arp-scan -I en0 --localnet        # en0 = Wi-Fi on macOS
+sudo arp-scan -I eth0 --localnet       # eth0/wlan0 = common Linux interfaces
 
-# Find your subnet first (to know what to scan)
-# macOS
+# Find your subnet first (so you know what range to scan)
+# macOS: get your IP + show default gateway (router IP)
 ipconfig getifaddr en0 && netstat -rn | grep default
-# Linux
+# Linux: show default route with gateway and interface
 ip route | grep default
+# Linux: get just your local IP (awk extracts first IP if multiple)
 hostname -I | awk '{print $1}'
 ```
 
 **Quick one-liner to count devices on network:**
 ```bash
-# macOS/Linux - count IPs on same network
+# Linux: extract your IP from route table, append /24, scan and count
+# -oP with \K = regex lookbehind to capture IP after "src "
 nmap -sn $(ip route | grep -oP 'src \K[\d.]+' | head -1)/24 2>/dev/null | grep -c "Nmap scan"
 
-# macOS specific
+# macOS: get IP, use sed to replace last octet with .0, scan subnet
+# e.g., 192.168.1.45 becomes 192.168.1.0/24
 nmap -sn $(ipconfig getifaddr en0 | sed 's/\.[0-9]*$/.0/')/24 | grep -c "Nmap scan"
 ```
 

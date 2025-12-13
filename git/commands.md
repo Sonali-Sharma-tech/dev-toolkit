@@ -11,6 +11,7 @@ A comprehensive guide to useful git commands, from daily operations to advanced 
 - [Staging and Unstaging](#staging-and-unstaging)
 - [Tags](#tags)
 - [Advanced Git Commands](#advanced-git-commands)
+- [Git Worktrees](#git-worktrees)
 - [GitHub CLI (gh) Commands](#github-cli-gh-commands)
 - [Clone with Specific User Config](#clone-with-specific-user-config)
 
@@ -545,6 +546,105 @@ Configure as default:
 git config pull.rebase true              # For current repo
 git config --global pull.rebase true     # For all repos
 ```
+
+---
+
+## Git Worktrees
+*Work on multiple branches simultaneously without stashing or switching*
+
+Worktrees let you checkout multiple branches at once, each in its own directory. Great for reviewing PRs while working on a feature, or running tests on one branch while coding on another.
+
+### List worktrees
+```bash
+# Show all worktrees (main repo + any linked worktrees)
+git worktree list
+```
+
+### Create a new worktree
+```bash
+# Create worktree for existing branch in sibling directory
+# Creates ../feature-branch directory with that branch checked out
+git worktree add ../feature-branch feature-branch
+
+# Create worktree with new branch (branching from current HEAD)
+git worktree add -b new-feature ../new-feature
+
+# Create worktree for new branch based on specific commit/branch
+git worktree add -b hotfix ../hotfix main
+
+# Create worktree in custom path
+git worktree add /path/to/worktree branch-name
+```
+
+### Worktree for reviewing PRs
+```bash
+# Fetch PR and create worktree to review it (keeps your work untouched)
+git fetch origin pull/123/head:pr-123
+git worktree add ../pr-123-review pr-123
+
+# Review the PR in ../pr-123-review, your main work stays in current directory
+```
+
+### Remove a worktree
+```bash
+# Remove worktree (after you're done with it)
+git worktree remove ../feature-branch
+
+# Force remove if worktree has changes
+git worktree remove --force ../feature-branch
+
+# Or just delete the directory and prune
+rm -rf ../feature-branch
+git worktree prune       # Clean up stale worktree references
+```
+
+### Worktree with detached HEAD
+```bash
+# Checkout specific commit without creating branch (detached HEAD)
+git worktree add --detach ../test-commit abc1234
+
+# Useful for testing old versions or specific commits
+```
+
+### Move a worktree
+```bash
+# Relocate worktree to different path
+git worktree move ../old-path ../new-path
+```
+
+### Lock/unlock worktree
+```bash
+# Prevent worktree from being pruned (useful on removable drives)
+git worktree lock ../feature-branch
+git worktree lock --reason "On USB drive" ../feature-branch
+
+# Unlock when done
+git worktree unlock ../feature-branch
+```
+
+### Common worktree workflow
+```bash
+# You're working on feature-a, but need to review a PR urgently
+git worktree add ../pr-review origin/pr-branch
+
+# Now you have:
+# /projects/repo          <- your feature-a work (untouched)
+# /projects/pr-review     <- PR code to review
+
+cd ../pr-review
+# ... review, test, comment on PR ...
+
+# When done, clean up
+cd ../repo
+git worktree remove ../pr-review
+```
+
+### Worktree vs Stash vs Clone
+| Method | Use When | Pros | Cons |
+|--------|----------|------|------|
+| Worktree | Frequent branch switching, PR reviews | Fast, shares .git, no stash needed | Extra directories |
+| Stash | Quick temporary switch | Simple, no extra dirs | Can lose stashes, merge conflicts |
+| Clone | Completely isolated work | Full isolation | Slow, uses more disk, separate remotes |
 
 ---
 
