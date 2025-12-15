@@ -5,6 +5,7 @@ Essential Docker commands for container management.
 ## Table of Contents
 - [docker run](#docker-run)
 - [docker ps](#docker-ps)
+- [docker stop / start](#docker-stop--start)
 
 ---
 
@@ -179,5 +180,65 @@ docker ps -a -f status=exited -f ancestor=ubuntu
 | `.Labels` | All labels |
 | `.Mounts` | Volume mounts |
 | `.Networks` | Network names |
+
+---
+
+## docker stop / start
+
+Stop and start containers.
+
+### docker stop
+```bash
+# Stop a running container (graceful, SIGTERM then SIGKILL after 10s)
+docker stop my-container
+
+# Stop with custom timeout (seconds)
+docker stop -t 30 my-container
+
+# Stop multiple containers
+docker stop container1 container2 container3
+
+# Stop all running containers
+docker stop $(docker ps -q)
+```
+
+### docker start
+```bash
+# Start a stopped container
+docker start my-container
+
+# Start with attached output
+docker start -a my-container
+
+# Start interactively
+docker start -ai my-container
+
+# Start multiple containers
+docker start container1 container2 container3
+```
+
+### docker restart
+```bash
+# Restart a container
+docker restart my-container
+
+# Restart with timeout
+docker restart -t 10 my-container
+
+# Restart all running containers
+docker restart $(docker ps -q)
+```
+
+### docker pause / unpause
+```bash
+# Pause a running container (freezes processes)
+docker pause my-container
+
+# Unpause a paused container
+docker unpause my-container
+
+# Pause all running containers
+docker pause $(docker ps -q)
+```
 
 ---
