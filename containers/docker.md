@@ -4,6 +4,7 @@ Essential Docker commands for container management.
 
 ## Table of Contents
 - [docker run](#docker-run)
+- [docker ps](#docker-ps)
 
 ---
 
@@ -102,5 +103,81 @@ docker run -d \
 | `--cpus` | CPU limit |
 | `-w` | Working directory |
 | `--user` | Run as user |
+
+---
+
+## docker ps
+
+List containers.
+
+```bash
+# List running containers
+docker ps
+
+# List all containers (including stopped)
+docker ps -a
+
+# List only container IDs
+docker ps -q
+
+# List all container IDs (including stopped)
+docker ps -aq
+
+# Show latest created container
+docker ps -l
+
+# Show last N containers
+docker ps -n 5
+
+# Show container sizes
+docker ps -s
+
+# Filter by status
+docker ps -f status=running
+docker ps -f status=exited
+docker ps -f status=paused
+
+# Filter by name
+docker ps -f name=my-container
+
+# Filter by ancestor (image)
+docker ps -f ancestor=nginx
+
+# Filter by label
+docker ps -f label=env=production
+
+# Filter exited with specific code
+docker ps -a -f exited=0
+docker ps -a -f exited=1
+
+# Custom format output
+docker ps --format "{{.ID}}: {{.Names}}"
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}"
+
+# Show only names
+docker ps --format "{{.Names}}"
+
+# JSON output
+docker ps --format json
+
+# Combine filters
+docker ps -a -f status=exited -f ancestor=ubuntu
+```
+
+### Format Placeholders
+
+| Placeholder | Description |
+|-------------|-------------|
+| `.ID` | Container ID |
+| `.Image` | Image name |
+| `.Command` | Command |
+| `.CreatedAt` | Creation time |
+| `.Status` | Container status |
+| `.Ports` | Port mappings |
+| `.Names` | Container names |
+| `.Size` | Container size |
+| `.Labels` | All labels |
+| `.Mounts` | Volume mounts |
+| `.Networks` | Network names |
 
 ---
