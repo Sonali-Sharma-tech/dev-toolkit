@@ -7,6 +7,7 @@ Essential Docker commands for container management.
 - [docker ps](#docker-ps)
 - [docker stop / start](#docker-stop--start)
 - [docker rm](#docker-rm)
+- [docker images / rmi](#docker-images--rmi)
 
 ---
 
@@ -290,5 +291,98 @@ docker container prune -f
 # Remove containers with specific label
 docker rm $(docker ps -aq -f label=env=test)
 ```
+
+---
+
+## docker images / rmi
+
+List and remove images.
+
+### docker images
+```bash
+# List all images
+docker images
+
+# List all images (including intermediate)
+docker images -a
+
+# List only image IDs
+docker images -q
+
+# List with specific repository
+docker images nginx
+
+# List with specific tag
+docker images nginx:latest
+
+# List dangling images (untagged)
+docker images -f dangling=true
+
+# List images by label
+docker images -f label=maintainer=me
+
+# List images created before another
+docker images -f before=nginx:latest
+
+# List images created since another
+docker images -f since=ubuntu:20.04
+
+# Custom format output
+docker images --format "{{.Repository}}:{{.Tag}} - {{.Size}}"
+
+# Show digests
+docker images --digests
+
+# Sort by size (largest first)
+docker images --format "{{.Size}}\t{{.Repository}}:{{.Tag}}" | sort -hr
+```
+
+### docker rmi
+```bash
+# Remove an image
+docker rmi nginx
+
+# Remove image by ID
+docker rmi abc123def456
+
+# Remove multiple images
+docker rmi nginx redis postgres
+
+# Force remove (even if used by containers)
+docker rmi -f nginx
+
+# Remove all dangling images
+docker rmi $(docker images -f dangling=true -q)
+
+# Remove all images
+docker rmi $(docker images -q)
+
+# Remove images by pattern
+docker rmi $(docker images | grep "test" | awk '{print $3}')
+
+# Remove unused images (interactive)
+docker image prune
+
+# Remove all unused images (not just dangling)
+docker image prune -a
+
+# Remove images older than 24 hours
+docker image prune -a --filter "until=24h"
+
+# Force prune without confirmation
+docker image prune -af
+```
+
+### Image Format Placeholders
+
+| Placeholder | Description |
+|-------------|-------------|
+| `.ID` | Image ID |
+| `.Repository` | Repository name |
+| `.Tag` | Image tag |
+| `.Digest` | Image digest |
+| `.CreatedAt` | Creation time |
+| `.CreatedSince` | Time since created |
+| `.Size` | Image size |
 
 ---
