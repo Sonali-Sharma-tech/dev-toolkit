@@ -6,6 +6,7 @@ Essential Docker commands for container management.
 - [docker run](#docker-run)
 - [docker ps](#docker-ps)
 - [docker stop / start](#docker-stop--start)
+- [docker rm](#docker-rm)
 
 ---
 
@@ -239,6 +240,55 @@ docker unpause my-container
 
 # Pause all running containers
 docker pause $(docker ps -q)
+```
+
+---
+
+## docker rm
+
+Remove containers.
+
+```bash
+# Remove a stopped container
+docker rm my-container
+
+# Remove multiple containers
+docker rm container1 container2 container3
+
+# Force remove a running container
+docker rm -f my-container
+
+# Remove container and its volumes
+docker rm -v my-container
+
+# Remove all stopped containers
+docker rm $(docker ps -aq -f status=exited)
+
+# Remove all containers (force)
+docker rm -f $(docker ps -aq)
+
+# Remove containers older than 24 hours
+docker container prune --filter "until=24h"
+
+# Interactive removal of stopped containers
+docker container prune
+
+# Remove containers by filter
+docker rm $(docker ps -aq -f ancestor=nginx)
+docker rm $(docker ps -aq -f name=test)
+```
+
+### Common Patterns
+
+```bash
+# Stop and remove all containers
+docker stop $(docker ps -q) && docker rm $(docker ps -aq)
+
+# Remove all stopped containers (clean way)
+docker container prune -f
+
+# Remove containers with specific label
+docker rm $(docker ps -aq -f label=env=test)
 ```
 
 ---
