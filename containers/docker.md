@@ -8,6 +8,7 @@ Essential Docker commands for container management.
 - [docker stop / start](#docker-stop--start)
 - [docker rm](#docker-rm)
 - [docker images / rmi](#docker-images--rmi)
+- [docker exec](#docker-exec)
 
 ---
 
@@ -384,5 +385,68 @@ docker image prune -af
 | `.CreatedAt` | Creation time |
 | `.CreatedSince` | Time since created |
 | `.Size` | Image size |
+
+---
+
+## docker exec
+
+Execute a command in a running container.
+
+```bash
+# Run command in container
+docker exec my-container ls -la
+
+# Interactive shell (bash)
+docker exec -it my-container bash
+
+# Interactive shell (sh - for alpine/minimal images)
+docker exec -it my-container sh
+
+# Run as specific user
+docker exec -u root my-container whoami
+docker exec -u 1000:1000 my-container id
+
+# Run with environment variable
+docker exec -e MY_VAR=value my-container env
+
+# Run with working directory
+docker exec -w /app my-container pwd
+
+# Run in detached mode (background)
+docker exec -d my-container touch /tmp/background-task
+
+# Run with specific privileges
+docker exec --privileged my-container mount /dev/sda1 /mnt
+
+# Combine flags for debugging
+docker exec -it -u root -w /var/log my-container bash
+```
+
+### Common Use Cases
+
+```bash
+# Check running processes
+docker exec my-container ps aux
+
+# View environment variables
+docker exec my-container env
+
+# Check network configuration
+docker exec my-container cat /etc/hosts
+docker exec my-container ip addr
+
+# Debug database container
+docker exec -it my-postgres psql -U postgres
+
+# Run MySQL commands
+docker exec -it my-mysql mysql -u root -p
+
+# Check Node.js app
+docker exec my-node node --version
+docker exec my-node npm list
+
+# Tail logs inside container
+docker exec my-container tail -f /var/log/app.log
+```
 
 ---
