@@ -9,6 +9,7 @@ Essential Docker commands for container management.
 - [docker rm](#docker-rm)
 - [docker images / rmi](#docker-images--rmi)
 - [docker exec](#docker-exec)
+- [docker logs](#docker-logs)
 
 ---
 
@@ -447,6 +448,78 @@ docker exec my-node npm list
 
 # Tail logs inside container
 docker exec my-container tail -f /var/log/app.log
+```
+
+---
+
+## docker logs
+
+View container logs.
+
+```bash
+# View all logs
+docker logs my-container
+
+# Follow logs in real-time (like tail -f)
+docker logs -f my-container
+
+# Show last N lines
+docker logs --tail 100 my-container
+
+# Show logs with timestamps
+docker logs -t my-container
+
+# Show logs since specific time
+docker logs --since 2024-01-01T00:00:00 my-container
+docker logs --since 1h my-container
+docker logs --since 30m my-container
+
+# Show logs until specific time
+docker logs --until 2024-01-01T12:00:00 my-container
+
+# Combine tail and follow
+docker logs -f --tail 50 my-container
+
+# Show timestamps with follow
+docker logs -tf my-container
+
+# View logs from all containers with same image
+for c in $(docker ps -q -f ancestor=nginx); do
+    echo "=== Container: $c ==="
+    docker logs --tail 10 $c
+done
+```
+
+### Log Filtering with grep
+
+```bash
+# Filter logs for errors
+docker logs my-container 2>&1 | grep -i error
+
+# Filter with context
+docker logs my-container 2>&1 | grep -A 5 -B 2 "Exception"
+
+# Count occurrences
+docker logs my-container 2>&1 | grep -c "ERROR"
+
+# Real-time filtering
+docker logs -f my-container 2>&1 | grep --line-buffered "WARNING"
+```
+
+### Log Output Streams
+
+```bash
+# stdout only
+docker logs my-container 2>/dev/null
+
+# stderr only
+docker logs my-container 2>&1 >/dev/null
+
+# Save logs to file
+docker logs my-container > container.log 2>&1
+
+# Save with rotation
+docker logs my-container 2>&1 | tee -a /var/log/my-container.log
 ```
 
 ---
