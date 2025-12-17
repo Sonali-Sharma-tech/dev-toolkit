@@ -12,6 +12,7 @@ Essential Docker commands for container management.
 - [docker logs](#docker-logs)
 - [docker inspect](#docker-inspect)
 - [docker cp](#docker-cp)
+- [docker stats](#docker-stats)
 
 ---
 
@@ -662,6 +663,90 @@ docker cp ./temp/file.txt container2:/data/
 
 # One-liner using tar
 docker cp container1:/data - | docker cp - container2:/data
+```
+
+---
+
+## docker stats
+
+Display live resource usage statistics for containers.
+
+```bash
+# Stats for all running containers (live updating)
+docker stats
+
+# Stats for specific container
+docker stats my-container
+
+# Stats for multiple containers
+docker stats container1 container2 container3
+
+# One-time snapshot (no live update)
+docker stats --no-stream
+
+# Show all containers (including stopped)
+docker stats -a
+
+# Custom format output
+docker stats --format "{{.Name}}: {{.CPUPerc}} CPU, {{.MemUsage}} RAM"
+
+# Table format with specific columns
+docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
+
+# JSON output (one-time)
+docker stats --no-stream --format json
+
+# Show container ID instead of name
+docker stats --format "table {{.ID}}\t{{.CPUPerc}}\t{{.MemPerc}}"
+```
+
+### Format Placeholders
+
+| Placeholder | Description |
+|-------------|-------------|
+| `.Container` | Container ID |
+| `.Name` | Container name |
+| `.CPUPerc` | CPU percentage |
+| `.MemUsage` | Memory usage / limit |
+| `.MemPerc` | Memory percentage |
+| `.NetIO` | Network I/O |
+| `.BlockIO` | Block I/O |
+| `.PIDs` | Number of PIDs |
+
+### Monitoring Scripts
+
+```bash
+# Log stats to file every 5 seconds
+while true; do
+    docker stats --no-stream >> stats.log
+    sleep 5
+done
+
+# Alert if CPU > 80%
+docker stats --no-stream --format "{{.Name}}: {{.CPUPerc}}" | \
+    awk -F': ' '{gsub(/%/,"",$2); if($2>80) print "HIGH CPU: "$1" at "$2"%"}'
+
+# Get memory usage for all containers
+docker stats --no-stream --format "{{.Name}}: {{.MemPerc}}" | sort -t: -k2 -rn
+
+# Monitor specific container and exit when stopped
+docker stats my-container
+```
+
+### Resource Monitoring Commands
+
+```bash
+# Top processes in container
+docker top my-container
+
+# Top with custom format
+docker top my-container -o pid,user,%cpu,%mem,cmd
+
+# Disk usage by containers
+docker system df
+
+# Detailed disk usage
+docker system df -v
 ```
 
 ---
