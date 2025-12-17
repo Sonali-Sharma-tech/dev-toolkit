@@ -10,6 +10,7 @@ Essential Docker commands for container management.
 - [docker images / rmi](#docker-images--rmi)
 - [docker exec](#docker-exec)
 - [docker logs](#docker-logs)
+- [docker inspect](#docker-inspect)
 
 ---
 
@@ -520,6 +521,81 @@ docker logs my-container > container.log 2>&1
 
 # Save with rotation
 docker logs my-container 2>&1 | tee -a /var/log/my-container.log
+```
+
+---
+
+## docker inspect
+
+View detailed information about containers, images, volumes, or networks.
+
+```bash
+# Inspect a container (full JSON output)
+docker inspect my-container
+
+# Inspect an image
+docker inspect nginx:latest
+
+# Inspect multiple objects
+docker inspect container1 container2
+
+# Get container IP address
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-container
+
+# Get container MAC address
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.MacAddress}}{{end}}' my-container
+
+# Get container hostname
+docker inspect -f '{{.Config.Hostname}}' my-container
+
+# Get container port bindings
+docker inspect -f '{{.NetworkSettings.Ports}}' my-container
+
+# Get environment variables
+docker inspect -f '{{.Config.Env}}' my-container
+
+# Get mounted volumes
+docker inspect -f '{{.Mounts}}' my-container
+
+# Get container state
+docker inspect -f '{{.State.Status}}' my-container
+
+# Get container start time
+docker inspect -f '{{.State.StartedAt}}' my-container
+
+# Get image ID used by container
+docker inspect -f '{{.Image}}' my-container
+
+# Get restart count
+docker inspect -f '{{.RestartCount}}' my-container
+
+# Get container command
+docker inspect -f '{{.Config.Cmd}}' my-container
+
+# Get entrypoint
+docker inspect -f '{{.Config.Entrypoint}}' my-container
+
+# Pretty print specific section
+docker inspect my-container | jq '.[0].NetworkSettings'
+
+# Check if container is running
+docker inspect -f '{{.State.Running}}' my-container
+```
+
+### Useful Format Templates
+
+```bash
+# Container summary
+docker inspect -f 'Name: {{.Name}} | IP: {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} | Status: {{.State.Status}}' my-container
+
+# Get all container IPs
+docker ps -q | xargs -I {} docker inspect -f '{{.Name}}: {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' {}
+
+# Check health status
+docker inspect -f '{{.State.Health.Status}}' my-container
+
+# Get image labels
+docker inspect -f '{{.Config.Labels}}' nginx:latest
 ```
 
 ---
