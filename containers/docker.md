@@ -11,6 +11,7 @@ Essential Docker commands for container management.
 - [docker exec](#docker-exec)
 - [docker logs](#docker-logs)
 - [docker inspect](#docker-inspect)
+- [docker cp](#docker-cp)
 
 ---
 
@@ -596,6 +597,71 @@ docker inspect -f '{{.State.Health.Status}}' my-container
 
 # Get image labels
 docker inspect -f '{{.Config.Labels}}' nginx:latest
+```
+
+---
+
+## docker cp
+
+Copy files between container and local filesystem.
+
+```bash
+# Copy file from container to host
+docker cp my-container:/path/in/container/file.txt ./local/path/
+
+# Copy file from host to container
+docker cp ./local/file.txt my-container:/path/in/container/
+
+# Copy directory from container
+docker cp my-container:/var/log/ ./logs/
+
+# Copy directory to container
+docker cp ./config/ my-container:/app/config/
+
+# Copy from stopped container (works too!)
+docker cp stopped-container:/data/backup.sql ./
+
+# Copy with archive mode (preserves permissions, ownership)
+docker cp -a my-container:/app/ ./backup/
+
+# Copy specific file from container
+docker cp my-container:/etc/nginx/nginx.conf ./nginx.conf
+
+# Copy to specific location in container
+docker cp nginx.conf my-container:/etc/nginx/nginx.conf
+```
+
+### Common Use Cases
+
+```bash
+# Backup database from container
+docker cp my-postgres:/var/lib/postgresql/data ./postgres-backup/
+
+# Copy logs for analysis
+docker cp my-app:/var/log/app.log ./debug/
+
+# Update config file in running container
+docker cp new-config.json my-app:/app/config.json
+
+# Extract built files from container
+docker cp builder-container:/app/dist/ ./release/
+
+# Copy SSL certificates
+docker cp certs/ my-nginx:/etc/nginx/ssl/
+
+# Backup container data before removal
+docker cp my-container:/data ./backup/data-$(date +%Y%m%d)/
+```
+
+### Copy Between Containers
+
+```bash
+# Using intermediate host directory
+docker cp container1:/data/file.txt ./temp/
+docker cp ./temp/file.txt container2:/data/
+
+# One-liner using tar
+docker cp container1:/data - | docker cp - container2:/data
 ```
 
 ---
