@@ -249,4 +249,12 @@ alias code.="code ."
 
 ---
 
+## macOS Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd + Shift + .` | Toggle hidden files in Finder |
+
+---
+
 *After editing, run `source ~/.zshrc` to apply changes.*
