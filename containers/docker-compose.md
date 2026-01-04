@@ -11,6 +11,7 @@ Multi-container applications made easy.
 - [Volumes and Data](#volumes-and-data)
 - [Environment Variables](#environment-variables)
 - [Production Tips](#production-tips)
+- [Troubleshooting Scenarios](#troubleshooting-scenarios)
 
 ---
 
@@ -593,6 +594,145 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+```
+
+---
+
+## Troubleshooting Scenarios
+
+### Scenario 1: "Container Keeps Restarting"
+
+**Situation:** Service starts and immediately stops in a loop.
+
+```bash
+# Step 1: Check logs for error
+docker-compose logs web
+
+# Step 2: See exit code
+docker-compose ps -a
+# Exit code 1 = app error, 137 = OOM killed
+
+# Step 3: Run interactively to debug
+docker-compose run --rm web sh
+# Now you can manually run the start command and see errors
+```
+
+**Common causes:**
+- Missing environment variable
+- Can't connect to database (not ready yet)
+- Permission error on mounted volume
+- OOM (out of memory) - increase memory limit
+
+---
+
+### Scenario 2: "Changes Not Reflected After Edit"
+
+**Situation:** You edited code but container shows old version.
+
+```bash
+# If using bind mount (volumes: ./src:/app)
+# Changes should be instant for interpreted languages
+
+# If it's a built image, rebuild:
+docker-compose up -d --build
+
+# Nuclear option - fresh everything:
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+---
+
+### Scenario 3: "App Can't Connect to Database"
+
+**Situation:** `connection refused` or `host not found` errors.
+
+```bash
+# Step 1: Is DB actually running?
+docker-compose ps
+
+# Step 2: Check DB logs
+docker-compose logs db
+
+# Step 3: Can you connect from app container?
+docker-compose exec web sh
+ping db                    # Should resolve
+nc -zv db 5432            # Port open?
+
+# Step 4: Check your connection string
+# Use service name, not localhost!
+# Wrong: postgres://localhost:5432
+# Right: postgres://db:5432
+```
+
+**Common fixes:**
+- Use service name as hostname (not `localhost`)
+- Add `depends_on` to wait for DB
+- Add healthcheck for proper wait
+
+---
+
+### Scenario 4: "Port Already in Use"
+
+**Situation:** `bind: address already in use` error.
+
+```bash
+# Step 1: Find what's using the port
+lsof -i :3000
+# or
+docker ps | grep 3000
+
+# Step 2: Stop the other container/process
+docker stop container-name
+# or
+kill $(lsof -t -i :3000)
+
+# Step 3: Or change your port mapping
+ports:
+  - "3001:3000"  # Use different host port
+```
+
+---
+
+### Scenario 5: "Volume Data Not Persisting"
+
+**Situation:** Data disappears when you restart containers.
+
+```bash
+# Check if using named volume vs bind mount
+docker-compose config | grep -A5 volumes
+
+# Named volume (persists):
+volumes:
+  - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+
+# Anonymous volume (doesn't persist):
+volumes:
+  - /var/lib/postgresql/data
+
+# Check if volume exists
+docker volume ls | grep postgres
+```
+
+---
+
+### Scenario 6: "Out of Disk Space"
+
+**Situation:** Docker errors about disk space.
+
+```bash
+# Step 1: Check Docker disk usage
+docker system df
+
+# Step 2: Clean up this project
+docker-compose down -v --rmi all
+
+# Step 3: Clean up system-wide
+docker system prune -a --volumes -f
 ```
 
 ---
