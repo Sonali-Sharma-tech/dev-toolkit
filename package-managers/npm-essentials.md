@@ -3,6 +3,7 @@
 The commands you'll use every day with npm.
 
 ## Table of Contents
+- [Real-World Workflows](#real-world-workflows)
 - [Quick Reference](#quick-reference)
 - [Installing Packages](#installing-packages)
 - [Managing Dependencies](#managing-dependencies)
@@ -11,6 +12,166 @@ The commands you'll use every day with npm.
 - [Publishing](#publishing)
 - [Troubleshooting](#troubleshooting)
 - [npm vs yarn vs pnpm](#npm-vs-yarn-vs-pnpm)
+
+---
+
+## Real-World Workflows
+
+### Scenario 1: "Starting on a New Project"
+
+**Situation:** You just cloned a repo and need to get it running.
+
+```bash
+# Step 1: Install dependencies
+npm install
+# or for exact versions from lock file (CI/CD recommended)
+npm ci
+
+# Step 2: Check what scripts are available
+npm run
+
+# Step 3: Usually one of these
+npm run dev
+npm start
+npm run serve
+```
+
+---
+
+### Scenario 2: "Adding a New Library to Your Project"
+
+**Situation:** You need to add axios for API calls.
+
+```bash
+# Step 1: Search for the package (optional)
+npm search axios
+
+# Step 2: Check package info
+npm info axios
+
+# Step 3: Install it
+npm install axios
+
+# Step 4: If it's a dev tool (testing, linting, etc.)
+npm install -D jest
+npm install -D eslint prettier
+```
+
+---
+
+### Scenario 3: "Project Won't Start After Pulling Latest Changes"
+
+**Situation:** Teammate added new dependencies, your project is broken.
+
+```bash
+# Step 1: Clean reinstall
+rm -rf node_modules
+npm install
+
+# Step 2: If still broken, try with lock file
+rm -rf node_modules package-lock.json
+npm install
+
+# Step 3: Check for peer dependency issues
+npm ls 2>&1 | grep "peer dep"
+```
+
+---
+
+### Scenario 4: "Updating Dependencies for Security"
+
+**Situation:** GitHub is showing security vulnerabilities.
+
+```bash
+# Step 1: See what's vulnerable
+npm audit
+
+# Step 2: Auto-fix what's safe
+npm audit fix
+
+# Step 3: See what still needs manual update
+npm outdated
+
+# Step 4: Update specific package
+npm update lodash
+
+# Step 5: Update to latest (may have breaking changes)
+npm install lodash@latest
+```
+
+---
+
+### Scenario 5: "Setting Up a New Project from Scratch"
+
+**Situation:** Starting a brand new project.
+
+```bash
+# Step 1: Create project folder
+mkdir my-project && cd my-project
+
+# Step 2: Initialize package.json
+npm init -y
+
+# Step 3: Add your dependencies
+npm install express
+npm install -D nodemon typescript @types/node
+
+# Step 4: Add scripts to package.json
+# "dev": "nodemon src/index.ts"
+# "build": "tsc"
+# "start": "node dist/index.js"
+```
+
+---
+
+### Scenario 6: "Running a One-Off Tool Without Installing"
+
+**Situation:** You need to use create-react-app or a CLI tool once.
+
+```bash
+# Use npx - runs without permanent install
+npx create-react-app my-app
+npx create-next-app my-next-app
+npx degit user/repo my-project
+
+# Run specific version
+npx cowsay@1.5.0 "Hello"
+
+# Run from GitHub
+npx github:piuccio/cowsay "Moo"
+```
+
+---
+
+### Scenario 7: "CI/CD Pipeline Setup"
+
+**Situation:** Setting up automated builds.
+
+```bash
+# Always use npm ci in CI/CD - it's faster and deterministic
+npm ci
+
+# For production builds
+npm ci --production  # Skip devDependencies
+
+# Run tests
+npm test
+
+# Build
+npm run build
+```
+
+**Example GitHub Actions:**
+```yaml
+- name: Install dependencies
+  run: npm ci
+
+- name: Run tests
+  run: npm test
+
+- name: Build
+  run: npm run build
+```
 
 ---
 
