@@ -3,14 +3,241 @@
 When you can't connect, follow this guide to find out why.
 
 ## Table of Contents
+- [Real-World Workflows](#real-world-workflows)
 - [Troubleshooting Flowchart](#troubleshooting-flowchart)
 - [Is It DNS?](#is-it-dns)
 - [Is the Port Open?](#is-the-port-open)
 - [Is the Service Running?](#is-the-service-running)
 - [Is There a Firewall?](#is-there-a-firewall)
 - [Can You Reach the Network?](#can-you-reach-the-network)
-- [Common Scenarios](#common-scenarios)
+- [Common Error Messages](#common-error-messages)
 - [Quick Diagnosis Commands](#quick-diagnosis-commands)
+
+---
+
+## Real-World Workflows
+
+### Scenario 1: "My API Can't Connect to the Database"
+
+**Situation:** Your Node.js app throws `ECONNREFUSED` when connecting to PostgreSQL.
+
+```bash
+# Step 1: Is the database running?
+docker ps | grep postgres
+# or
+systemctl status postgresql
+
+# Step 2: Is it listening on the right port?
+ss -tlnp | grep 5432
+# Should show: LISTEN 0 128 0.0.0.0:5432
+
+# Step 3: Can you connect locally?
+nc -zv localhost 5432
+# or
+psql -h localhost -U postgres -c "SELECT 1"
+
+# Step 4: Is your app using the right host?
+# Check your connection string:
+# - "localhost" only works if app and DB are on same machine
+# - Use container name in Docker networks
+# - Use actual IP for remote databases
+
+# Step 5: Check DB logs for connection attempts
+docker logs postgres-container | tail -20
+```
+
+**Common fixes:**
+- Database bound to `127.0.0.1` instead of `0.0.0.0`
+- Wrong port in connection string
+- Docker network not set up correctly
+
+---
+
+### Scenario 2: "Website Works Locally but Not from Other Machines"
+
+**Situation:** `curl localhost:3000` works, but others can't access your dev server.
+
+```bash
+# Step 1: What interface is the server bound to?
+ss -tlnp | grep 3000
+# Bad:  127.0.0.1:3000 (localhost only)
+# Good: 0.0.0.0:3000 (all interfaces)
+
+# Step 2: Fix the binding
+# Node.js: app.listen(3000, '0.0.0.0')
+# Python: flask run --host=0.0.0.0
+# React:  HOST=0.0.0.0 npm start
+
+# Step 3: Check firewall
+sudo ufw status                    # Linux
+sudo iptables -L -n | grep 3000    # Linux
+# macOS: System Preferences → Security → Firewall
+
+# Step 4: Find your IP for others to use
+ip addr | grep inet                # Linux
+ifconfig | grep inet               # macOS
+# Share: http://192.168.1.x:3000
+```
+
+---
+
+### Scenario 3: "SSH Connection Keeps Timing Out"
+
+**Situation:** `ssh user@server` hangs and eventually times out.
+
+```bash
+# Step 1: Is the server reachable at all?
+ping server-ip
+
+# Step 2: Is SSH port open?
+nc -zv server-ip 22 -w 5
+# If timeout → firewall or SSH not running
+
+# Step 3: Try verbose mode for clues
+ssh -vvv user@server
+
+# Step 4: Is SSH running on the server? (if you have console access)
+sudo systemctl status sshd
+ss -tlnp | grep :22
+
+# Step 5: Check if firewall allows SSH
+sudo ufw status | grep 22
+sudo iptables -L -n | grep 22
+
+# Step 6: Check SSH config for restrictions
+cat /etc/ssh/sshd_config | grep -E "^(Port|ListenAddress|AllowUsers)"
+```
+
+**Common fixes:**
+- SSH running on non-standard port
+- Firewall blocking port 22
+- Cloud security group not allowing inbound SSH
+- VPN required to reach the network
+
+---
+
+### Scenario 4: "Can't Pull Docker Images"
+
+**Situation:** `docker pull nginx` times out or fails.
+
+```bash
+# Step 1: Can you reach Docker Hub?
+ping registry-1.docker.io
+curl -I https://registry-1.docker.io/v2/
+
+# Step 2: DNS working?
+nslookup registry-1.docker.io
+dig registry-1.docker.io
+
+# Step 3: Proxy issues?
+echo $HTTP_PROXY $HTTPS_PROXY
+
+# Step 4: Check Docker daemon config
+cat /etc/docker/daemon.json
+
+# Step 5: Test with explicit registry
+docker pull docker.io/library/nginx
+
+# Step 6: Check Docker logs
+sudo journalctl -u docker -f
+```
+
+**Common fixes:**
+- Corporate proxy not configured in Docker
+- DNS not resolving Docker Hub
+- Firewall blocking HTTPS (443)
+
+---
+
+### Scenario 5: "My Container Can't Reach the Internet"
+
+**Situation:** Container starts but can't `curl` external URLs.
+
+```bash
+# Step 1: Test from inside container
+docker exec -it container-name sh
+ping 8.8.8.8        # Can reach internet?
+ping google.com     # DNS works?
+
+# Step 2: Check container DNS
+docker exec container-name cat /etc/resolv.conf
+
+# Step 3: Check Docker network
+docker network inspect bridge
+
+# Step 4: Check host iptables NAT
+sudo iptables -t nat -L -n | grep MASQUERADE
+
+# Step 5: Check Docker daemon DNS config
+cat /etc/docker/daemon.json | grep dns
+```
+
+**Common fixes:**
+- Docker DNS not configured: Add `{"dns": ["8.8.8.8"]}` to daemon.json
+- iptables FORWARD policy is DROP
+- Missing NAT/MASQUERADE rules
+
+---
+
+### Scenario 6: "API Requests Work in Postman but Not in Browser"
+
+**Situation:** CORS errors in browser, but API works fine in Postman/curl.
+
+```bash
+# Step 1: This isn't a network issue - it's CORS
+# Browsers enforce CORS, curl/Postman don't
+
+# Step 2: Check response headers
+curl -I http://api.example.com/endpoint
+# Look for: Access-Control-Allow-Origin
+
+# Step 3: Check preflight request
+curl -X OPTIONS http://api.example.com/endpoint \
+  -H "Origin: http://localhost:3000" \
+  -H "Access-Control-Request-Method: POST" -v
+
+# Fix: Configure your API server to send CORS headers
+# Access-Control-Allow-Origin: http://localhost:3000
+# Access-Control-Allow-Methods: GET, POST, OPTIONS
+# Access-Control-Allow-Headers: Content-Type, Authorization
+```
+
+---
+
+### Scenario 7: "Deployed App Works But Very Slow"
+
+**Situation:** App responds but takes 10+ seconds.
+
+```bash
+# Step 1: Is it network latency?
+ping server-ip
+# High ms = network issue
+# Low ms = app/server issue
+
+# Step 2: Trace the route
+traceroute server-ip
+mtr server-ip
+# Look for high latency hops
+
+# Step 3: Is it DNS lookup delay?
+time curl -w "DNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" -o /dev/null -s http://your-app.com
+
+# Step 4: Check if it's the database
+# (On server) Monitor query times
+# PostgreSQL: \timing on
+# MySQL: SET profiling = 1;
+
+# Step 5: Check server resources
+ssh server "top -bn1 | head -20"
+ssh server "free -m"
+ssh server "df -h"
+```
+
+**Common causes:**
+- Slow DNS resolution
+- Database queries not indexed
+- Server out of memory (swapping)
+- Cold start (serverless/containers)
 
 ---
 
@@ -346,7 +573,7 @@ sudo ip route add default via 192.168.1.1
 
 ---
 
-## Common Scenarios
+## Common Error Messages
 
 ### "Connection Refused"
 ```bash
