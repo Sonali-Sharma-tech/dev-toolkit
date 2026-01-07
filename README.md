@@ -30,18 +30,17 @@ grep -rn "searchterm" .
 
 ## What's Inside
 
-> **Difficulty:** 🟢 Beginner | 🟡 Intermediate | 🔴 Advanced
-
-| Section | Description | Level |
-|---------|-------------|-------|
-| [Git Commands](git/commands.md) | Version control from basics to advanced (rebase, cherry-pick, reflog) | 🟢🟡🔴 |
-| [Terminal Cheatsheet](terminal/) | Bash one-liners, Zsh tips, productivity shortcuts | 🟢🟡 |
-| [Vim/Neovim](editors/) | Essential editor commands and navigation | 🟡 |
-| [Regex Patterns](regex/) | Real-world patterns, copy-paste ready | 🟡🔴 |
-| [Docker & Kubernetes](containers/) | Container commands and debugging | 🟡🔴 |
-| [npm/yarn/pnpm](package-managers/) | Package manager unified reference | 🟢🟡 |
-| [Networking](networking/) | SSH, curl, API testing, debugging | 🟡🔴 |
-| [Troubleshooting](troubleshooting/) | Common errors and how to fix them | 🟢🟡 |
+| Section | What You'll Find |
+|---------|------------------|
+| [Git](git/) | Oops recovery, history spelunking, team workflows, config |
+| [Terminal](terminal/) | Bash one-liners, Zsh tips, productivity shortcuts |
+| [Vim/Neovim](editors/) | Survival guide → Productivity → Configuration |
+| [Regex](regex/) | Basics, recipes with test strings, language differences |
+| [Docker](containers/) | Cleanup, compose, troubleshooting |
+| [Package Managers](package-managers/) | npm essentials, Homebrew guide |
+| [Networking](networking/) | SSH, curl, debugging flowcharts |
+| [Troubleshooting](troubleshooting/) | Error messages decoded (git, npm, docker, ssh) |
+| [Scripts](scripts/) | Auto-update, dev environment setup, git hooks |
 
 ---
 
