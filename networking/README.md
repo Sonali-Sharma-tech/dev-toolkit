@@ -6,6 +6,9 @@
 
 | Guide | What's Inside |
 |-------|---------------|
+| [curl Essentials](curl-essentials.md) | HTTP requests, API testing |
+| [SSH Mastery](ssh-mastery.md) | Keys, config, tunnels, jump hosts |
+| [DNS & Ports](dns-ports.md) | Resolve names, manage ports |
 | [Debugging](debugging.md) | Troubleshooting flowcharts + real scenarios |
 
 ---
