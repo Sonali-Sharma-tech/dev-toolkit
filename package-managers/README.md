@@ -7,7 +7,9 @@
 | Guide | What's Inside |
 |-------|---------------|
 | [npm Essentials](npm-essentials.md) | Daily npm commands + workflows |
+| [Yarn & pnpm](yarn-pnpm.md) | Alternatives comparison |
 | [Homebrew](homebrew.md) | macOS package management |
+| [Troubleshooting](troubleshooting.md) | node_modules nightmares solved |
 
 ---
 
