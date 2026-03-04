@@ -15,6 +15,7 @@ When things go wrong in Git, don't panic. This guide has your back.
 - [I lost commits and need them back](#i-lost-commits-and-need-them-back)
 - [I want to undo a pushed commit](#i-want-to-undo-a-pushed-commit)
 - [I accidentally staged files I shouldn't have](#i-accidentally-staged-files-i-shouldnt-have)
+- [I want to remove a file from a PR](#i-want-to-remove-a-file-from-a-pr)
 - [Nuclear Options](#nuclear-options)
 
 ---
@@ -456,6 +457,41 @@ cd fresh-copy
 git add .
 git commit -m "Apply changes"
 ```
+
+---
+
+## I want to remove a file from a PR
+
+### Step 1: Check if the file exists on main
+```bash
+git show main:path/to/file
+# If "fatal: path exists on disk, but not in 'main'" → file is NOT on main
+# If it prints file contents → file EXISTS on main
+```
+
+### File NOT on main (added only in your branch)
+```bash
+# Remove from git tracking (keeps file on disk)
+git rm --cached path/to/file
+
+# Commit and push
+git commit -m "remove file from tracking"
+git push
+```
+Result: File disappears from PR entirely (never existed on main, doesn't exist in final state).
+
+### File EXISTS on main (you modified it but don't want to)
+```bash
+# Restore to exact main version
+git checkout main -- path/to/file
+
+# Commit and push
+git commit -m "restore file to main version"
+git push
+```
+Result: File is identical to main, so PR shows no diff for it.
+
+> **Key insight**: PRs compare your branch's final state against main. Make the file match main's state and it vanishes from the diff.
 
 ---
 
