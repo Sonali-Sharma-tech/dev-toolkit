@@ -2,10 +2,10 @@
 
 > Commands you look up more than once belong in a cheatsheet.
 
-[![Stars](https://img.shields.io/github/stars/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/stargazers)
+[![Cheatsheets](https://img.shields.io/badge/Cheatsheets-58%20files-blue)](https://github.com/Sonali-Sharma-tech/dev-toolkit)
 [![Last Commit](https://img.shields.io/github/last-commit/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/commits)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey)](https://github.com/Sonali-Sharma-tech/dev-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A practical reference for daily dev work — not docs, not tutorials. Copy-paste ready commands with context for *when* to use them.
 
