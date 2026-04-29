@@ -97,9 +97,33 @@ After:  A -- B (HEAD)    C is gone (or kept based on flag)
 ### 🚨 IMPORTANT: Rotate credentials FIRST
 **Before doing anything in git, go rotate/revoke the exposed credentials!**
 
-### Remove from history (small repos)
+### Using git-filter-repo (Recommended — Modern)
 ```bash
-# Remove file from entire history
+# Install
+brew install git-filter-repo
+
+# 1. Clone fresh — filter-repo requires a clean clone
+git clone https://github.com/user/repo.git repo-clean
+cd repo-clean
+
+# 2. Replace the secret string across ALL history
+echo "actual_secret_value==>REDACTED" > /tmp/replacements.txt
+git filter-repo --replace-text /tmp/replacements.txt
+
+# 3. Re-add remote (filter-repo removes it intentionally) and force push
+git remote add origin https://github.com/user/repo.git
+git push origin --force --all
+git push origin --force --tags
+```
+
+> **Why git-filter-repo over filter-branch?** `filter-branch` is deprecated (removed in Git 2.36+), 10–100x slower, and has subtle bugs. `git filter-repo` is the official replacement.
+
+> **Note**: Delete and recreate the repo if there are open PRs — PR diffs cache the old content and remain visible even after force push.
+
+### Remove from history (deprecated — avoid)
+```bash
+# git filter-branch is deprecated. Use git-filter-repo above instead.
+# Shown here only for reference on older systems.
 git filter-branch --force --index-filter \
   'git rm --cached --ignore-unmatch path/to/secret-file' \
   --prune-empty --tag-name-filter cat -- --all
@@ -109,7 +133,7 @@ git push origin --force --all
 git push origin --force --tags
 ```
 
-### Using BFG Repo Cleaner (faster for large repos)
+### Using BFG Repo Cleaner (alternative for large repos)
 ```bash
 # Install BFG
 brew install bfg
