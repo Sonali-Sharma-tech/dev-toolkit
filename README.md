@@ -1,104 +1,123 @@
-# Dev Toolkit - Developer Cheatsheet & Command Reference
+# Dev Toolkit
 
-[![GitHub stars](https://img.shields.io/github/stars/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/stargazers)
-[![GitHub last commit](https://img.shields.io/github/last-commit/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/commits)
+> Commands you look up more than once belong in a cheatsheet.
+
+[![Stars](https://img.shields.io/github/stars/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/stargazers)
+[![Last Commit](https://img.shields.io/github/last-commit/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/commits)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub issues](https://img.shields.io/github/issues/Sonali-Sharma-tech/dev-toolkit)](https://github.com/Sonali-Sharma-tech/dev-toolkit/issues)
-[![GitHub forks](https://img.shields.io/github/forks/Sonali-Sharma-tech/dev-toolkit?style=flat)](https://github.com/Sonali-Sharma-tech/dev-toolkit/network)
 
-A practical, no-fluff reference guide for developers. Commands, shortcuts, and cheatsheets you'll actually use daily.
-
-> **No googling the same command twice.** Bookmark this and get back to coding.
+A practical reference for daily dev work — not docs, not tutorials. Copy-paste ready commands with context for *when* to use them.
 
 ---
 
-## Quick Examples
+## Jump To
+
+| I want to... | Go here |
+|---|---|
+| Undo something in git | [git/oops-recovery.md](git/oops-recovery.md) |
+| Review history / find a commit | [git/history.md](git/history.md) |
+| Set up git config properly | [git/config.md](git/config.md) |
+| Work on a team branch workflow | [git/team-workflows.md](git/team-workflows.md) |
+| Debug a network/curl issue | [networking/debugging.md](networking/debugging.md) |
+| Master curl | [networking/curl-essentials.md](networking/curl-essentials.md) |
+| SSH setup and shortcuts | [networking/ssh-mastery.md](networking/ssh-mastery.md) |
+| Survive vim (or actually use it) | [editors/vim-survival.md](editors/vim-survival.md) |
+| Clean up Docker mess | [containers/docker-cleanup.md](containers/docker-cleanup.md) |
+| Fix npm / Homebrew issues | [package-managers/troubleshooting.md](package-managers/troubleshooting.md) |
+
+---
+
+## One-Liners
 
 ```bash
-# Undo last commit but keep changes
+# Undo last commit, keep changes staged
 git reset --soft HEAD~1
 
-# Find and kill process on port 3000
+# Undo last PUSHED commit (safe — creates a revert commit)
+git revert HEAD && git push
+
+# Scrub a secret from ALL git history (modern approach)
+brew install git-filter-repo
+echo "real_secret==>REDACTED" > replacements.txt
+git filter-repo --replace-text replacements.txt
+
+# Kill process on port 3000
 lsof -ti:3000 | xargs kill -9
 
-# Search for text in all files recursively
-grep -rn "searchterm" .
+# Find large files
+find . -type f -size +100M -exec ls -lh {} \;
+
+# Delete all node_modules recursively
+find . -name "node_modules" -type d -prune -exec rm -rf {} +
+
+# Pretty print JSON
+cat file.json | python3 -m json.tool
+
+# Quick HTTP server
+python3 -m http.server 8000
+
+# Count lines of code (excluding node_modules)
+find . -name '*.js' -not -path './node_modules/*' | xargs wc -l
+
+# Disk usage sorted by size
+du -sh */ | sort -hr
 ```
 
 ---
 
 ## What's Inside
 
-| Section | What You'll Find |
-|---------|------------------|
-| [Git](git/) | Oops recovery, history spelunking, team workflows, config |
-| [Terminal](terminal/) | Bash one-liners, Zsh tips, productivity shortcuts |
-| [Vim/Neovim](editors/) | Survival guide → Productivity → Configuration |
-| [Regex](regex/) | Basics, recipes with test strings, language differences |
-| [Docker](containers/) | Cleanup, compose, troubleshooting |
-| [Package Managers](package-managers/) | npm essentials, Homebrew guide |
-| [Networking](networking/) | SSH, curl, debugging flowcharts |
-| [Troubleshooting](troubleshooting/) | Error messages decoded (git, npm, docker, ssh) |
-| [Scripts](scripts/) | Auto-update, dev environment setup, git hooks |
-
----
-
-## One-Liners You'll Actually Use
-
-Copy, paste, done. No explanations needed.
-
-```bash
-# Kill process on port
-lsof -ti:3000 | xargs kill -9
-
-# Undo last commit, keep changes staged
-git reset --soft HEAD~1
-
-# Find large files in current directory
-find . -type f -size +100M -exec ls -lh {} \;
-
-# Delete all node_modules recursively
-find . -name "node_modules" -type d -prune -exec rm -rf {} +
-
-# Get your public IP
-curl -s ifconfig.me
-
-# Pretty print JSON
-cat file.json | python3 -m json.tool
-
-# Count lines of code (excluding node_modules)
-find . -name '*.js' -not -path './node_modules/*' | xargs wc -l
-
-# Quick HTTP server in current directory
-python3 -m http.server 8000
-
-# Search command history
-history | grep "search_term"
-
-# Disk usage of current directory
-du -sh */ | sort -hr
 ```
+git/
+  ├── oops-recovery.md     ← committed secrets, wrong branch, lost commits
+  ├── history.md           ← log, blame, bisect, diff
+  ├── branching.md         ← strategies, naming, rebasing
+  ├── team-workflows.md    ← PR flow, code review, merge strategies
+  ├── config.md            ← aliases, hooks, global setup
+  ├── commands.md          ← quick reference
+  └── daily-workflow.md    ← morning → commit → push ritual
 
-> 💡 Want more? Check out [Terminal Cheatsheet](terminal/) for the full collection.
+networking/
+  ├── curl-essentials.md   ← auth, headers, debugging, SSL
+  ├── ssh-mastery.md       ← keys, config, tunnels, agent forwarding
+  ├── debugging.md         ← flowcharts for common failures
+  ├── commands.md          ← netstat, dig, nmap, openssl
+  └── dns-ports.md         ← common ports, DNS resolution
+
+editors/
+  ├── vim-survival.md      ← minimum to not get stuck
+  ├── vim-productive.md    ← motions, macros, registers
+  ├── vim-config.md        ← .vimrc setup
+  └── vim.md               ← full reference
+
+containers/
+  ├── docker.md            ← images, containers, volumes
+  ├── docker-compose.md    ← services, networks, overrides
+  └── docker-cleanup.md    ← prune everything safely
+
+package-managers/
+  ├── npm-essentials.md    ← install, audit, scripts, workspaces
+  ├── yarn-pnpm.md         ← when to use which
+  ├── homebrew.md          ← install, update, doctor
+  └── troubleshooting.md  ← cache issues, permission errors
+```
 
 ---
 
 ## Philosophy
 
-- **Copy-paste ready** - Minimal placeholders, maximum usability
-- **"When to use"** - Context for each command, not just syntax
-- **Real examples** - Practical patterns from actual workflows
-- **Cross-platform** - macOS/Linux differences noted where applicable
+- **Context over syntax** — every command explains *when*, not just *how*
+- **Warnings where it matters** — destructive commands are labelled clearly
+- **No outdated commands** — deprecated flags are marked, modern alternatives shown
+- **Cross-platform** — macOS/Linux differences noted where they exist
 
 ---
 
 ## Contributing
 
-Found a useful command or hack? PRs welcome!
+Found a command you look up more than once? [Open a PR](CONTRIBUTING.md) — format it like the existing entries (command + when to use it + any gotchas).
 
 ---
 
-If this saved you time, consider giving it a star. It helps others find it too.
-
-*Built for developers who value their time.*
+*Built for developers who'd rather ship than google.*
