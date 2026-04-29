@@ -297,10 +297,20 @@ done
 
 ### SSL Certificate Errors
 
+> ⚠️ **NEVER use `-k` in production.** It disables SSL/TLS verification entirely — any attacker on the network can intercept and modify traffic. Use only in local dev with self-signed certs.
+
 ```bash
-# Skip SSL verification (dev only!)
+# LOCAL DEV ONLY — never in production, CI/CD, or against real APIs
 curl -k https://self-signed.example.com
 ```
+
+> **Better fix**: Add the self-signed cert to your system trust store instead:
+> ```bash
+> # macOS
+> sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain cert.pem
+> # curl with specific CA bundle (no global trust needed)
+> curl --cacert ./my-ca.pem https://self-signed.example.com
+> ```
 
 ### Timeout
 
